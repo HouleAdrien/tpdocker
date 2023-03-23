@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  app:
+    image: myapp:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - flyway
+        condition: service_completed_successfully
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  flyway:
+    image: flyway/flyway:latest
+    command: -url=jdbc:postgresql://db:5432/mydb -user=myuser -password=mypassword migrate
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      - db
+volumes:
+  db_data:
